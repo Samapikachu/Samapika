@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe Viewer</title>
+</head>
+<body>
+
+  <label for="dietInput">Enter Diet:</label>
+  <input type="text" id="dietInput">
+  <button onclick="fetchAndDisplayRecipes()">Show Recipes</button>
+
+  <div id="recipesContainer"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.3/xlsx.full.min.js"></script>
+  <script>
+    function fetchAndDisplayRecipes() {
+      const selectedDiet = document.getElementById('dietInput').value.trim().toLowerCase();
+
+      if (!selectedDiet) {
+        alert('Please enter a diet.');
+        return;
+      }
+
+      fetch('C:/Users/SAMAPIKA/Desktop/php/recipes.xlsx')
+        .then(response => response.arrayBuffer())
+        .then(buffer => {
+          const workbook = XLSX.read(new Uint8Array(buffer), { type: 'array' });
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
+          const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+          const headers = data[0];
+          const recipes = data.slice(1);
+
+          const filteredRecipes = recipes.filter(recipe => recipe[headers.indexOf('Diet')] === selectedDiet);
+
+          const numRecipesToShow = 3;
+          const randomIndexes = generateRandomIndexes(numRecipesToShow, filteredRecipes.length);
+
+          const recipesContainer = document.getElementById('recipesContainer');
+          recipesContainer.innerHTML = '';  // Clear previous content
+
+          randomIndexes.forEach(index => {
+            const recipeData = filteredRecipes[index];
+            const recipeHtml = `
+              <div>
+                <h4>Name: ${recipeData[headers.indexOf('RecipeName')]}</h4>
+                <p>Ingredients: ${recipeData[headers.indexOf('Ingredients')]}</p>
+                <p>Calories: ${recipeData[headers.indexOf('Calories')]}</p>
+                <p>Carbon Footprint Amt: ${recipeData[headers.indexOf('Carbon Footprint Amt')]}</p>
+                <p>Cuisine: ${recipeData[headers.indexOf('Cuisine')]}</p>
+                <p>Course: ${recipeData[headers.indexOf('Course')]}</p>
+                <p>Diet: ${recipeData[headers.indexOf('Diet')]}</p>
+                <p>Instructions: ${recipeData[headers.indexOf('Instructions')]}</p>
+                <hr>
+              </div>
+            `;
+            recipesContainer.innerHTML += recipeHtml;
+          });
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function generateRandomIndexes(numToShow, totalLength) {
+      const randomIndexes = [];
+      while (randomIndexes.length < numToShow) {
+        const randomIndex = Math.floor(Math.random() * totalLength);
+        if (!randomIndexes.includes(randomIndex)) {
+          randomIndexes.push(randomIndex);
+        }
+      }
+      return randomIndexes;
+    }
+  </script>
+
+</body>
+</html>

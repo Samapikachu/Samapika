@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diet Recipe Planner</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+
+        form {
+            max-width: 400px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        label, select, button {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 10px;
+            background-color: #4caf50;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #recipesContainer {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .recipe {
+            background-color: #fff;
+            padding: 20px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+
+<form id="dietForm">
+    <label for="dietType">Select Your Diet:</label>
+    <select id="dietType" required>
+        <option value="vegetarian">Vegetarian</option>
+        <option value="nonVegetarian">Non-Vegetarian</option>
+        <option value="vegan">Vegan</option>
+        <option value="diabeticFriendly">Diabetic Friendly</option>
+    </select>
+
+    <button type="button" onclick="fetchAndDisplayRecipes()">Get Recipes</button>
+</form>
+
+<div id="recipesContainer"></div>
+
+<script>
+    function fetchAndDisplayRecipes() {
+        const selectedDiet = document.getElementById('dietType').value.toLowerCase();
+
+        // Simulating fetching recipes from the server
+        const recipes = getRecipesFromServer(selectedDiet);
+
+        // Display recipes
+        displayRecipes(recipes);
+    }
+
+    function getRecipesFromServer(selectedDiet) {
+        // In a real scenario, you would fetch recipes from a server using AJAX or fetch API.
+        // For simplicity, we are using dummy data here.
+        const dummyRecipes = [
+            { name: 'Recipe 1', type: 'Vegetarian', ingredients: '...', instructions: '...' },
+            { name: 'Recipe 2', type: 'Vegetarian', ingredients: '...', instructions: '...' },
+            { name: 'Recipe 3', type: 'Vegan', ingredients: '...', instructions: '...' },
+            { name: 'Recipe 4', type: 'Non-Vegetarian', ingredients: '...', instructions: '...' },
+            { name: 'Recipe 5', type: 'Diabetic Friendly', ingredients: '...', instructions: '...' },
+        ];
+
+        return dummyRecipes.filter(recipe => recipe.type.toLowerCase() === selectedDiet);
+    }
+
+    function displayRecipes(recipes) {
+        const recipesContainer = document.getElementById('recipesContainer');
+        recipesContainer.innerHTML = '';  // Clear previous content
+
+        if (recipes.length === 0) {
+            recipesContainer.innerHTML = '<p>No recipes found for the selected diet.</p>';
+        } else {
+            recipesContainer.style.display = 'block';  // Show the container
+
+            recipes.forEach(recipe => {
+                const recipeHtml = `
+                    <div class="recipe">
+                        <h3>${recipe.name}</h3>
+                        <p>Type: ${recipe.type}</p>
+                        <p>Ingredients: ${recipe.ingredients}</p>
+                        <p>Instructions: ${recipe.instructions}</p>
+                    </div>
+                `;
+                recipesContainer.innerHTML += recipeHtml;
+            });
+        }
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMI Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+	body {
+  background-image: url('img2.jpg');
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: 100% 100%;
+	
+}
+        form {
+            max-width: 400px;
+            margin: 20px auto;
+        }
+        input, select, button {
+            margin-bottom: 10px;
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        #bmiResult, #fitnessStatus {
+            display: none;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<form id="preferencesForm">
+<h1><center>Select Your Preferences</center></h1>
+
+    <label for="name">Name:</label>
+    <input type="text" id="name" required>
+
+    <label for="email">Email:</label>
+    <input type="email" id="email" required>
+
+    <label for="activityStatus">Activity Status:</label>
+    <select id="activityStatus" required>
+        <option value="sedentary">Sedentary</option>
+        <option value="moderate">Moderate</option>
+        <option value="active">Active</option>
+    </select>
+
+    <label>Your Food Types:</label>
+    <div>
+        <input type="checkbox" id="vegetarian" value="vegetarian">
+        <label for="vegetarian">Vegetarian</label>
+    </div>
+    <div>
+        <input type="checkbox" id="vegan" value="vegan">
+        <label for="vegan">Vegan</label>
+    </div>
+    <div>
+        <input type="checkbox" id="glutenFree" value="glutenFree">
+        <label for="glutenFree">Non Vegetarian</label>
+    </div>
+
+    <button type="button" onclick="openBmiPage()">Submit</button>
+</form>
+
+<div id="bmiResult">
+    <form id="user">
+    <h2><center>BMI Calculator</center></h2>
+    <label for="age">Age:</label>
+    <input type="number" id="age" required>
+
+    <label for="weight">Weight (kg):</label>
+    <input type="number" id="weight" required>
+
+    <label for="height">Height (cm):</label>
+    <input type="number" id="height" required>
+
+    <label for="gender">Gender:</label>
+    <select id="gender" required>
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+    </select>
+
+    <button type="button" onclick="calculateBmiAndBmr()">Calculate BMI</button>
+
+    <h3 id="bmiResultValue"></h3>
+    <h3 id="bmrResultValue"></h3>
+    <h3 id="fitnessStatus"></h3>
+
+
+    <input type="button" value="Next" onclick="redirectToDietPlanner()">
+
+
+</form>
+
+</div>
+
+<script>
+    function storePreferences() {
+        const preferences = {
+            name: document.getElementById("name").value,
+            email: document.getElementById("email").value,
+            activityStatus: document.getElementById("activityStatus").value,
+            foodTypes: collectFoodTypes(),
+        };
+
+        // Store preferences in local storage (you might want to use a server or database for a real application)
+        localStorage.setItem("userPreferences", JSON.stringify(preferences));
+    }
+
+    function collectFoodTypes() {
+        const foodTypes = [];
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+        checkboxes.forEach(checkbox => {
+            foodTypes.push(checkbox.value);
+        });
+        return foodTypes;
+    }
+
+    function openBmiPage() {
+        // Store preferences before redirecting
+        storePreferences();
+
+        document.getElementById("preferencesForm").style.display = "none";
+        document.getElementById("bmiResult").style.display = "block";
+    }
+
+    function calculateBmiAndBmr() {
+        const age = document.getElementById("age").value;
+        const weight = document.getElementById("weight").value;
+        const height = document.getElementById("height").value;
+        const gender = document.getElementById("gender").value;
+
+        // BMI Calculation (simplified for illustration)
+        const bmi = weight / ((height / 100) ** 2);
+
+        // BMR Calculation (using Harris-Benedict equation)
+        let bmr;
+        if (gender === "male") {
+            bmr = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age);
+        } else {
+            bmr = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);
+        }
+
+        document.getElementById("bmiResultValue").innerText = `Your BMI: ${bmi.toFixed(2)}`;
+        document.getElementById("bmrResultValue").innerText = `Your BMR: ${bmr.toFixed(2)} calories/day`;
+
+        // Determine fitness status based on BMI
+        let fitnessStatus;
+        if (bmi < 18.5) {
+            fitnessStatus = "Underweight";
+        } else if (bmi >= 18.5 && bmi < 25) {
+            fitnessStatus = "Normal Weight";
+        } else if (bmi >= 25 && bmi < 30) {
+            fitnessStatus = "Overweight";
+        } else {
+            fitnessStatus = "Obese";
+        }
+
+        document.getElementById("fitnessStatus").innerText = `Fitness Status: ${fitnessStatus}`;
+        document.getElementById("fitnessStatus").style.display = "block";
+        document.getElementById("bmiResult").style.display = "block";
+    }
+    function redirectToDietPlanner() {
+    // Redirect to the diet-planner.html file
+    window.location.href = 'try.html';
+}
+
+</script>
+</body>
+</html>

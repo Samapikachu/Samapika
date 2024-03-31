@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diet Planner</title>
+</head>
+<body>
+
+  <div id="welcomePage">
+    <h1>Welcome to the Diet Planner</h1>
+    <button onclick="showPreferencesForm()">Get Started</button>
+  </div>
+
+  <div id="preferencesForm" style="display: none;">
+    <h2>Enter Your Preferences</h2>
+    <label for="name">Name:</label>
+    <input type="text" id="name" required>
+
+    <label for="email">Email:</label>
+    <input type="email" id="email" required>
+
+    <label for="activityStatus">Activity Status:</label>
+    <select id="activityStatus" required>
+        <option value="sedentary">Sedentary</option>
+        <option value="moderate">Moderate</option>
+        <option value="active">Active</option>
+    </select>
+
+    <label for="dietPreference">Diet Preference:</label>
+    <input type="text" id="dietPreference" required>
+
+    <button onclick="calculateBMIAndBMR()">Calculate BMI and BMR</button>
+  </div>
+
+  <div id="bmiBmrResult" style="display: none;">
+    <h2>BMI and BMR Results</h2>
+    <label for="age">Age:</label>
+    <input type="number" id="age" required>
+
+    <label for="weight">Weight (kg):</label>
+    <input type="number" id="weight" required>
+
+    <label for="height">Height (cm):</label>
+    <input type="number" id="height" required>
+
+    <label for="gender">Gender:</label>
+    <select id="gender" required>
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+    </select>
+
+    <h3 id="bmiResult"></h3>
+    <h3 id="bmrResult"></h3>
+    <button onclick="showRecipes()">Show Recipes</button>
+  </div>
+
+  <div id="recipesContainer" style="display: none;"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.3/xlsx.full.min.js"></script>
+  <script>
+    function showPreferencesForm() {
+      document.getElementById('welcomePage').style.display = 'none';
+      document.getElementById('preferencesForm').style.display = 'block';
+    }
+
+    function calculateBMIAndBMR() {
+      const age = document.getElementById('age').value;
+      const weight = document.getElementById('weight').value;
+      const height = document.getElementById('height').value;
+      const gender = document.getElementById('gender').value;
+
+      // BMI Calculation
+      const bmi = weight / ((height / 100) ** 2);
+
+      // BMR Calculation
+      let bmr;
+      if (gender === 'male') {
+        bmr = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age);
+      } else {
+        bmr = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);
+      }
+
+      document.getElementById('bmiResult').innerText = `Your BMI: ${bmi.toFixed(2)}`;
+      document.getElementById('bmrResult').innerText = `Your BMR: ${bmr.toFixed(2)} calories/day`;
+
+      document.getElementById('preferencesForm').style.display = 'none';
+      document.getElementById('bmiBmrResult').style.display = 'block';
+    }
+
+    function showRecipes() {
+      const dietPreference = document.getElementById('dietPreference').value.trim().toLowerCase();
+
+      fetch('recipes.xlsx')
+        .then(response => response.arrayBuffer())
+        .then(buffer => {
+          const workbook = XLSX.read(new Uint8Array(buffer), { type: 'array' });
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
+          const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+          const headers = data[0];
+          const recipes = data.slice(1);
+
+          const filteredRecipes = recipes.filter(recipe => recipe[headers.indexOf('Diet')] === dietPreference);
+
+          const numRecipesToShow = 5;
+          const randomIndexes = generateRandomIndexes(numRecipesToShow, filteredRecipes.length);
+
+          const recipesContainer = document.getElementById('recipesContainer');
+          recipesContainer.innerHTML = '';
+
+          randomIndexes.forEach(index => {
+            const recipeData = filteredRecipes[index];
+            const recipeHtml = `
+              <div>
+                <h4>Name: ${recipeData[headers.indexOf('RecipeName')]}</h4>
+                <p>Ingredients: ${recipeData[headers.indexOf('Ingredients')]}</p>
+                <p>Calories: ${recipeData[headers.indexOf('Calories')]}</p>
+                <p>Carbon Footprint Amt: ${recipeData[headers.indexOf('Carbon Footprint Amt')]}</p>
+                <p>Cuisine: ${recipeData[headers.indexOf('Cuisine')]}</p>
+                <p>Diet: ${recipeData[headers.indexOf('Diet')]}</p>
+                <p>Instructions: ${recipeData[headers.indexOf('Instructions')]}</p>
+                <hr>
+              </div>
+            `;
+            recipesContainer.innerHTML += recipeHtml;
+          });
+
+          document.getElementById('bmiBmrResult').style.display = 'none';
+          document.getElementById('recipesContainer').style.display = 'block';
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function generateRandomIndexes(numToShow, totalLength) {
+      const randomIndexes = [];
+      while (randomIndexes.length < numToShow) {
+        const randomIndex = Math.floor(Math.random() * totalLength);
+        if (!randomIndexes.includes(randomIndex)) {
+          randomIndexes.push(randomIndex);
+        }
+      }
+      return randomIndexes;
+    }
+  </script>
+
+</body>
+</html>

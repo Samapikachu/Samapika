@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMI Calculator</title>
+    <script type="text/javascript" src="https://unpkg.com/xlsx@0.15.1/dist/xlsx.full.min.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+	body {
+  background-image: url('please.jpg');
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: 100% 100%;
+	
+  }
+        form {
+            max-width: 400px;
+            margin: 20px auto;
+        }
+        input, select, button {
+            margin-bottom: 10px;
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        #bmiResult, #fitnessStatus {
+            display: none;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<form id="preferencesForm">
+<h1><center>Select Your Preferences</center></h1>
+
+    <label for="name">Name:</label>
+    <input type="text" id="name" required>
+
+    <label for="email">Email:</label>
+    <input type="email" id="email" required>
+
+    <label for="activityStatus">Activity Status:</label>
+    <select id="activityStatus" required>
+        <option value="sedentary">Sedentary</option>
+        <option value="moderate">Moderate</option>
+        <option value="active">Active</option>
+    </select>
+
+    <label>Food Types:</label>
+    <div>
+        <input type="checkbox" id="vegetarian" value="vegetarian">
+        <label for="vegetarian">Vegetarian</label>
+    </div>
+    <div>
+        <input type="checkbox" id="vegan" value="vegan">
+        <label for="vegan">Vegan</label>
+    </div>
+    <div>
+        <input type="checkbox" id="glutenFree" value="glutenFree">
+        <label for="glutenFree">Gluten-Free</label>
+    </div>
+
+    <button type="button" onclick="openBmiPage()">Submit</button>
+</form>
+
+<div id="bmiResult">
+    <form id="user">
+    <h2><center>BMI Calculator</center></h2>
+    <label for="age">Age:</label>
+    <input type="number" id="age" required>
+
+    <label for="weight">Weight (kg):</label>
+    <input type="number" id="weight" required>
+
+    <label for="height">Height (cm):</label>
+    <input type="number" id="height" required>
+
+    <label for="gender">Gender:</label>
+    <select id="gender" required>
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+    </select>
+
+    <button type="button" onclick="calculateBmiAndBmr()">Calculate BMI</button>
+
+    <h3 id="bmiResultValue"></h3>
+    <h3 id="bmrResultValue"></h3>
+    <h3 id="fitnessStatus"></h3>
+
+
+    <!-- <input type="submit" value="Next"> -->
+
+    <button type="button" onclick="dummy()">show something</button>
+    <h3 id="diettype"></h3>
+    <h3 id="reciepe"></h3>
+    <h3 id="fitnessStatus"></h3>
+</form>
+
+</div>
+
+<script>
+    function storePreferences() {
+        const preferences = {
+            name: document.getElementById("name").value,
+            email: document.getElementById("email").value,
+            activityStatus: document.getElementById("activityStatus").value,
+            foodTypes: collectFoodTypes(),
+        };
+
+        // Store preferences in local storage (you might want to use a server or database for a real application)
+        localStorage.setItem("userPreferences", JSON.stringify(preferences));
+    }
+
+    function collectFoodTypes() {
+        const foodTypes = [];
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+        checkboxes.forEach(checkbox => {
+            foodTypes.push(checkbox.value);
+        });
+        return foodTypes;
+    }
+
+    function openBmiPage() {
+        // Store preferences before redirecting
+        storePreferences();
+
+        document.getElementById("preferencesForm").style.display = "none";
+        document.getElementById("bmiResult").style.display = "block";
+    }
+
+    function calculateBmiAndBmr() {
+        const age = document.getElementById("age").value;
+        const weight = document.getElementById("weight").value;
+        const height = document.getElementById("height").value;
+        const gender = document.getElementById("gender").value;
+
+        // BMI Calculation (simplified for illustration)
+        const bmi = weight / ((height / 100) ** 2);
+
+        // BMR Calculation (using Harris-Benedict equation)
+        let bmr;
+        if (gender === "male") {
+            bmr = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age);
+        } else {
+            bmr = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);
+        }
+
+        document.getElementById("bmiResultValue").innerText = `Your BMI: ${bmi.toFixed(2)}`;
+        document.getElementById("bmrResultValue").innerText = `Your BMR: ${bmr.toFixed(2)} calories/day`;
+
+        // Determine fitness status based on BMI
+        let fitnessStatus;
+        if (bmi < 18.5) {
+            fitnessStatus = "Underweight";
+        } else if (bmi >= 18.5 && bmi < 25) {
+            fitnessStatus = "Normal Weight";
+        } else if (bmi >= 25 && bmi < 30) {
+            fitnessStatus = "Overweight";
+        } else {
+            fitnessStatus = "Obese";
+        }
+
+        document.getElementById("fitnessStatus").innerText = `Fitness Status: ${fitnessStatus}`;
+        document.getElementById("fitnessStatus").style.display = "block";
+        document.getElementById("bmiResult").style.display = "block";
+    }
+
+function dummy() {
+
+  const header =     document.getElementById("bmiResultValue");
+  // const myPara = document.createElement("h4");
+  header.innerText = `RecipeName: ${myjason[0].RecipeName} // Ingredients: ${myjason[0].Ingredients}`;
+  // header.innerText = myPara;
+}
+async function populate() {
+  const requestURL =
+    "https://mdn.github.io/learning-area/javascript/oojs/json/superheroes.json";
+  const request = new Request(requestURL);
+
+  const response = await fetch(request);
+  const superHeroes = await response.json();
+
+  populateHeader(superHeroes);
+  populateHeroes(superHeroes);
+}
+function populateHeader(obj) {
+  const header = document.querySelector("header");
+  const myH1 = document.createElement("h1");
+  myH1.textContent = obj.squadName;
+  header.appendChild(myH1);
+
+  const myPara = document.createElement("p");
+  myPara.textContent = `Hometown: ${obj.homeTown} // Formed: ${obj.formed}`;
+  header.appendChild(myPara);
+}
+function populateHeroes(obj) {
+  const section = document.querySelector("section");
+  const heroes = obj.members;
+
+  for (const hero of heroes) {
+    const myArticle = document.createElement("article");
+    const myH2 = document.createElement("h2");
+    const myPara1 = document.createElement("p");
+    const myPara2 = document.createElement("p");
+    const myPara3 = document.createElement("p");
+    const myList = document.createElement("ul");
+
+    myH2.textContent = hero.name;
+    myPara1.textContent = `Secret identity: ${hero.secretIdentity}`;
+    myPara2.textContent = `Age: ${hero.age}`;
+    myPara3.textContent = "Superpowers:";
+
+    const superPowers = hero.powers;
+    for (const power of superPowers) {
+      const listItem = document.createElement("li");
+      listItem.textContent = power;
+      myList.appendChild(listItem);
+    }
+
+    myArticle.appendChild(myH2);
+    myArticle.appendChild(myPara1);
+    myArticle.appendChild(myPara2);
+    myArticle.appendChild(myPara3);
+    myArticle.appendChild(myList);
+
+    section.appendChild(myArticle);
+  }
+}
+
+</script>
+
+
+<script src="myjason.js">
+
+</script> -->
+</body>
+</html>
